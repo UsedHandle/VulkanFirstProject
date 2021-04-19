@@ -7,6 +7,9 @@ SHORTLDFLAGS = -lglfw3 -lvulkan -lm -lpthread -ldl
 VulkanTest: *.cpp *.hpp
 	g++ $(CFLAGS) -o VulkanTest *.cpp $(LDFLAGS)
 
+Shader: shaders/*.frag shaders/*.vert
+	./compile.sh
+
 .Phony: test clean
 
 test: VulkanTest

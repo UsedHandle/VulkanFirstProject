@@ -2,39 +2,59 @@
 
 #include "lve_device.hpp"
 
+// std
 #include <string>
 #include <vector>
 
 namespace lve {
 
-	struct PipelineConfigInfo{};
+struct PipelineConfigInfo {
+  PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+  PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
-	class LvePipeline {
-		public:
-			LvePipeline(
-				LveDevice &device, 
-				const std::string& vertFilepath, 
-				const std::string& fragFilepath, 
-				const PipelineConfigInfo& configInfo);
+  VkPipelineViewportStateCreateInfo viewportInfo;
+  VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+  VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+  VkPipelineMultisampleStateCreateInfo multisampleInfo;
+  VkPipelineColorBlendAttachmentState colorBlendAttachment;
+  VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+  VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+  std::vector<VkDynamicState> dynamicStateEnables;
+  VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+  VkPipelineLayout pipelineLayout = nullptr;
+  VkRenderPass renderPass = nullptr;
+  uint32_t subpass = 0;
+};
 
-			~LvePipeline() {}
+class LvePipeline {
+ public:
+  LvePipeline(
+      LveDevice& device,
+      const std::string& vertFilepath,
+      const std::string& fragFilepath,
+      const PipelineConfigInfo& configInfo);
+  ~LvePipeline();
 
-			LvePipeline(const LvePipeline&) = delete;
-			void operator=(const LvePipeline&) = delete;
+  LvePipeline(const LvePipeline&) = delete;
+  LvePipeline &operator=(const LvePipeline&) = delete;
 
-			static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+  void bind(VkCommandBuffer commandBuffer);
 
-		private:
-			static std::vector<char> readFile(const std::string& filepath);
+  static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
-			void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo configInfo);
+ private:
+  static std::vector<char> readFile(const std::string& filepath);
 
-			void createShaderModule(const std::vector<char>& code, VkShaderModule*  shaderModule);
+  void createGraphicsPipeline(
+      const std::string& vertFilepath,
+      const std::string& fragFilepath,
+      const PipelineConfigInfo& configInfo);
 
-			LveDevice& lveDevice;
+  void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-			VkPipeline graphicsPipeline;
-			VkShaderModule vertShaderModule;
-			VkShaderModule fragShaderModule;
-	};
-}
+  LveDevice& lveDevice;
+  VkPipeline graphicsPipeline;
+  VkShaderModule vertShaderModule;
+  VkShaderModule fragShaderModule;
+};
+}  // namespace lve
